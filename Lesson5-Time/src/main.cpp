@@ -1,4 +1,5 @@
 #include <iostream>
+#include <tuple>
 
 class Time{
     private:
@@ -6,6 +7,7 @@ class Time{
     int * time_arr=0;
     public:
     //constructor
+    /*
     Time(int hours, int minutes, int seconds){
         time_arr=new int[3];
         setTime(hours,minutes,seconds);
@@ -49,18 +51,62 @@ class Time{
         }
         return *this;
     }
-    int getMinutes() const{
-        return time_arr[MINUTES_INDEX];
+    //ctor
+*/  Time(int seconds=0, int minutes=0, int hours=0){
+    time_arr=new int[3];
+    setTime(hours,minutes,seconds);
+    }
+    //dtor
+    ~Time(){
+        delete[] time_arr;
+    } 
+    //copy ctor
+    Time (const Time& other){
+        time_arr=new int[3];
+        
+        time_arr[MINUTES_INDEX]=other.time_arr[MINUTES_INDEX];
+        time_arr[HOURS_INDEX]=other.time_arr[HOURS_INDEX];
+        time_arr[SECONDS_INDEX]=other.time_arr[SECONDS_INDEX];
+        
+    }
+    // move ctor
+    Time( Time&& other){
+        time_arr=new int[3];
+         time_arr[MINUTES_INDEX]=other.time_arr[MINUTES_INDEX];
+        time_arr[HOURS_INDEX]=other.time_arr[HOURS_INDEX];
+        time_arr[SECONDS_INDEX]=other.time_arr[SECONDS_INDEX];
+        delete[] other.time_arr;
+        other.time_arr=nullptr;
+    }
+    //copy assignment
+    Time& operator=(const Time& other){
+        if (this!=&other){
+            delete[] time_arr;
+            time_arr[MINUTES_INDEX]=other.time_arr[MINUTES_INDEX];
+            time_arr[HOURS_INDEX]=other.time_arr[HOURS_INDEX];
+            time_arr[SECONDS_INDEX]=other.time_arr[SECONDS_INDEX];
+        }
+        return *this;
+    }
+    Time& operator=(Time&& other){
+        if (this!=&other){
+            delete[] time_arr;
+            time_arr[MINUTES_INDEX]=other.time_arr[MINUTES_INDEX];
+            time_arr[HOURS_INDEX]=other.time_arr[HOURS_INDEX];
+            time_arr[SECONDS_INDEX]=other.time_arr[SECONDS_INDEX];
+            delete[] other.time_arr;
+            other.time_arr=nullptr;
+        }
+        return *this;
     }
 
-    int getSeconds() const{
-        return time_arr[SECONDS_INDEX];
+    void setTime(int hours,int minutes, int seconds){
+        setHours(hours);
+        setMinutes(minutes);
+        setSeconds(seconds);
+        
     }
-
-    int getHours() const{
-        return time_arr[HOURS_INDEX];
-    }
-
+    
     void setHours(int hours){
         if (hours>=0){
             time_arr[HOURS_INDEX]=hours;
@@ -88,13 +134,19 @@ class Time{
             std::exit(EXIT_FAILURE);
         }
     }
-
-    void setTime(int hours,int minutes, int seconds){
-        setHours(hours);
-        setMinutes(minutes);
-        setSeconds(seconds);
-        
+    int getMinutes() const{
+        return time_arr[MINUTES_INDEX];
     }
+
+    int getSeconds() const{
+        return time_arr[SECONDS_INDEX];
+    }
+
+    int getHours() const{
+        return time_arr[HOURS_INDEX];
+    }
+
+
 
      // Operator Overloads
     Time operator+(int seconds) const {
@@ -110,22 +162,22 @@ class Time{
 
     Time operator+(const Time& other) const {
         Time result(*this);
-        result.seconds(result.seconds() + other.seconds());
-        result.minutes(result.minutes() + other.minutes());
-        result.hours(result.hours() + other.hours());
+        result.time_arr[SECONDS_INDEX]=(result.time_arr[SECONDS_INDEX] + other.time_arr[SECONDS_INDEX]);
+        result.time_arr[MINUTES_INDEX]=(result.time_arr[MINUTES_INDEX] + other.time_arr[MINUTES_INDEX]);
+        result.time_arr[HOURS_INDEX]=(result.time_arr[HOURS_INDEX] + other.time_arr[HOURS_INDEX]);
         result.normalizeTime();
         return result;
     }
 
     // Comparison Operators
     bool operator<(const Time& other) const {
-        return std::tie(timeData[HOURS_INDEX], timeData[MINUTES_INDEX], timeData[SECONDS_INDEX]) <
-               std::tie(other.timeData[HOURS_INDEX], other.timeData[MINUTES_INDEX], other.timeData[SECONDS_INDEX]);
+        return std::tie(time_arr[HOURS_INDEX], time_arr[MINUTES_INDEX], time_arr[SECONDS_INDEX]) <
+               std::tie(other.time_arr[HOURS_INDEX], other.time_arr[MINUTES_INDEX], other.time_arr[SECONDS_INDEX]);
     }
 
     bool operator==(const Time& other) const {
-        return std::tie(timeData[HOURS_INDEX], timeData[MINUTES_INDEX], timeData[SECONDS_INDEX]) ==
-               std::tie(other.timeData[HOURS_INDEX], other.timeData[MINUTES_INDEX], other.timeData[SECONDS_INDEX]);
+        return std::tie(time_arr[HOURS_INDEX], time_arr[MINUTES_INDEX], time_arr[SECONDS_INDEX]) ==
+               std::tie(other.time_arr[HOURS_INDEX], other.time_arr[MINUTES_INDEX], other.time_arr[SECONDS_INDEX]);
     }
 
     bool operator>(const Time& other) const {
@@ -145,23 +197,23 @@ class Time{
     }
 
     // Output Operator
-    friend std::ostream& operator<<(std::ostream& os, const Time& t) {
-        os << t.hours() << " hours, " << t.minutes() << " minutes, " << t.seconds() << " seconds";
+    friend std::ostream& operator<<(std::ostream& os, const Time& t)  {
+        os << t.getHours() << " hours, " << t.getMinutes() << " minutes, " << t.getSeconds() << " seconds";
         return os;
     }
 
 private:
     // Helper function to normalize time
     void normalizeTime() {
-        int carryMinutes = timeData[SECONDS_INDEX] / 60;
-        timeData[SECONDS_INDEX] %= 60;
+        int carryMinutes = time_arr[SECONDS_INDEX] / 60;
+        time_arr[SECONDS_INDEX] %= 60;
 
-        timeData[MINUTES_INDEX] += carryMinutes;
-        int carryHours = timeData[MINUTES_INDEX] / 60;
-        timeData[MINUTES_INDEX] %= 60;
+        time_arr[MINUTES_INDEX] += carryMinutes;
+        int carryHours = time_arr[MINUTES_INDEX] / 60;
+        time_arr[MINUTES_INDEX] %= 60;
 
-        timeData[HOURS_INDEX] += carryHours;
+        time_arr[HOURS_INDEX] += carryHours;
     }
 };
-};
+
 
